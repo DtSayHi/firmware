@@ -1003,7 +1003,7 @@ void setup()
 #if HAS_SCREEN
     if (config.display.displaymode != meshtastic_Config_DisplayConfig_DisplayMode_COLOR) {
 
-#if defined(HAS_SPI_TFT) || defined(USE_EINK) || defined(USE_SPISSD1306)
+#if defined(HAS_SPI_TFT) || defined(USE_EINK) || defined(USE_SPISSD1306) || defined(USE_ST7305)
         screen = std::make_unique<graphics::Screen>(screen_found, screen_model, screen_geometry);
 #elif defined(ARCH_PORTDUINO)
         if ((screen_found.port != ScanI2C::I2CPort::NO_I2C || portduino_config.displayPanel) &&
@@ -1140,7 +1140,7 @@ void setup()
 #if !MESHTASTIC_EXCLUDE_I2C
 // Don't call screen setup until after nodedb is setup (because we need
 // the current region name)
-#if defined(HAS_SPI_TFT) || defined(USE_EINK) || defined(USE_SPISSD1306)
+#if defined(HAS_SPI_TFT) || defined(USE_EINK) || defined(USE_SPISSD1306) || defined(USE_ST7305)
     if (screen)
         screen->setup();
 #elif defined(ARCH_PORTDUINO)

@@ -1118,7 +1118,7 @@ void NodeDB::installDefaultConfig(bool preserveKey = false)
 
     config.bluetooth.fixed_pin = defaultBLEPin;
 
-#if defined(USE_EINK) || defined(HAS_SPI_TFT) || defined(USE_SPISSD1306)
+#if defined(USE_EINK) || defined(HAS_SPI_TFT) || defined(USE_SPISSD1306) || defined(USE_ST7305)
     bool hasScreen = true;
 #if defined(TFT_NV3001B_DETECT)
     hasScreen = nv3001bPanelPresent(TFT_CS, TFT_SCL, TFT_SDA, TFT_RS, TFT_RST, TFT_EN, TFT_BL);

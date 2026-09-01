@@ -98,7 +98,7 @@
 #define FONT_LARGE_LOCAL FONT_MEDIUM_LOCAL
 #endif
 
-#if (defined(USE_EINK) || defined(HAS_SPI_TFT)) && !defined(DISPLAY_FORCE_SMALL_FONTS)
+#if (defined(USE_EINK) || defined(HAS_SPI_TFT) || defined(USE_ST7305)) && !defined(DISPLAY_FORCE_SMALL_FONTS)
 // The screen is bigger so use bigger fonts
 #define FONT_SMALL FONT_MEDIUM_LOCAL // Height: 19
 #define FONT_MEDIUM FONT_LARGE_LOCAL // Height: 28

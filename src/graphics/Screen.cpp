@@ -586,6 +586,8 @@ Screen::Screen(ScanI2C::DeviceAddress address, meshtastic_Config_DisplayConfig_O
         static_cast<SSD1306Spi *>(dispdev)->setHorizontalOffset(32);
         LOG_INFO("SSD1306 init success");
     }
+#elif defined(USE_ST7305)
+    dispdev = new ST7305Display();
 #elif ARCH_PORTDUINO
 
     // HUB75 RGB matrix (hzeller/rpi-rgb-led-matrix) is a BaseUI framebuffer panel, selected at
