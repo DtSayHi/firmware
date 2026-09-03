@@ -25,4 +25,26 @@ MosTeleKey classifyJoystick(uint16_t xMillivolts, uint16_t yMillivolts)
         return MosTeleKey::UP;
     return MosTeleKey::NONE;
 }
+
+MosTeleAction actionForKey(MosTeleKey key)
+{
+    switch (key) {
+    case MosTeleKey::UP:
+        return MosTeleAction::UP;
+    case MosTeleKey::DOWN:
+        return MosTeleAction::DOWN;
+    case MosTeleKey::LEFT:
+        return MosTeleAction::LEFT;
+    case MosTeleKey::RIGHT:
+        return MosTeleAction::RIGHT;
+    case MosTeleKey::BUTTON_47:
+        return MosTeleAction::SELECT;
+    case MosTeleKey::BUTTON_48:
+        return MosTeleAction::CANCEL;
+    case MosTeleKey::SELECT:
+        return MosTeleAction::BACK;
+    default:
+        return MosTeleAction::NONE;
+    }
+}
 } // namespace MosTeleInput

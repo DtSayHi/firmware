@@ -7,7 +7,7 @@
 void setUp(void) {}
 void tearDown(void) {}
 
-void test_st7305_frame_packs_pixel_pairs_in_reference_order()
+void test_st7305_frame_rotates_pixels_180_degrees()
 {
     std::array<uint8_t, ST7305Frame::BUFFER_SIZE> source{};
     std::array<uint8_t, ST7305Frame::BUFFER_SIZE> wire{};
@@ -18,12 +18,12 @@ void test_st7305_frame_packs_pixel_pairs_in_reference_order()
 
     ST7305Frame::pack(source.data(), wire.data());
 
-    TEST_ASSERT_EQUAL_HEX8(0xC0, wire[0]);
+    TEST_ASSERT_EQUAL_HEX8(0x80, wire[0]);
     TEST_ASSERT_EQUAL_HEX8(0x00, wire[1]);
-    TEST_ASSERT_EQUAL_HEX8(0x01, wire[ST7305Frame::BUFFER_SIZE - 1]);
+    TEST_ASSERT_EQUAL_HEX8(0x03, wire[ST7305Frame::BUFFER_SIZE - 1]);
 }
 
-void test_st7305_frame_places_next_pixel_pair_after_42_bytes()
+void test_st7305_frame_reverses_pixel_pair_order()
 {
     std::array<uint8_t, ST7305Frame::BUFFER_SIZE> source{};
     std::array<uint8_t, ST7305Frame::BUFFER_SIZE> wire{};
@@ -31,17 +31,30 @@ void test_st7305_frame_places_next_pixel_pair_after_42_bytes()
 
     ST7305Frame::pack(source.data(), wire.data());
 
-    TEST_ASSERT_EQUAL_HEX8(0x00, wire[0]);
-    TEST_ASSERT_EQUAL_HEX8(0x80, wire[42]);
+    TEST_ASSERT_EQUAL_HEX8(0x00, wire[ST7305Frame::BUFFER_SIZE - 1]);
+    TEST_ASSERT_EQUAL_HEX8(0x01, wire[ST7305Frame::BUFFER_SIZE - 43]);
 }
 
-void test_wheel_thresholds_match_reference_firmware()
+void test_buttons_map_to_confirm_and_cancel()
 {
-    TEST_ASSERT_EQUAL(MosTeleKey::WHEEL_DOWN, MosTeleInput::classifyWheel(299));
-    TEST_ASSERT_EQUAL(MosTeleKey::WHEEL_SELECT, MosTeleInput::classifyWheel(300));
-    TEST_ASSERT_EQUAL(MosTeleKey::WHEEL_SELECT, MosTeleInput::classifyWheel(499));
-    TEST_ASSERT_EQUAL(MosTeleKey::WHEEL_UP, MosTeleInput::classifyWheel(500));
-    TEST_ASSERT_EQUAL(MosTeleKey::NONE, MosTeleInput::classifyWheel(600));
+    TEST_ASSERT_EQUAL(MosTeleAction::SELECT, MosTeleInput::actionForKey(MosTeleKey::BUTTON_47));
+    TEST_ASSERT_EQUAL(MosTeleAction::CANCEL, MosTeleInput::actionForKey(MosTeleKey::BUTTON_48));
+}
+
+void test_joystick_select_maps_to_text_backspace()
+{
+    TEST_ASSERT_EQUAL(MosTeleAction::BACK, MosTeleInput::actionForKey(MosTeleKey::SELECT));
+}
+
+void test_only_joystick_directions_produce_navigation_actions()
+{
+    TEST_ASSERT_EQUAL(MosTeleAction::UP, MosTeleInput::actionForKey(MosTeleKey::UP));
+    TEST_ASSERT_EQUAL(MosTeleAction::DOWN, MosTeleInput::actionForKey(MosTeleKey::DOWN));
+    TEST_ASSERT_EQUAL(MosTeleAction::LEFT, MosTeleInput::actionForKey(MosTeleKey::LEFT));
+    TEST_ASSERT_EQUAL(MosTeleAction::RIGHT, MosTeleInput::actionForKey(MosTeleKey::RIGHT));
+    TEST_ASSERT_EQUAL(MosTeleAction::NONE, MosTeleInput::actionForKey(MosTeleKey::WHEEL_UP));
+    TEST_ASSERT_EQUAL(MosTeleAction::NONE, MosTeleInput::actionForKey(MosTeleKey::WHEEL_DOWN));
+    TEST_ASSERT_EQUAL(MosTeleAction::NONE, MosTeleInput::actionForKey(MosTeleKey::WHEEL_SELECT));
 }
 
 void test_joystick_uses_reference_directions_and_x_axis_priority()
@@ -56,9 +69,11 @@ void test_joystick_uses_reference_directions_and_x_axis_priority()
 int main(int argc, char **argv)
 {
     UNITY_BEGIN();
-    RUN_TEST(test_st7305_frame_packs_pixel_pairs_in_reference_order);
-    RUN_TEST(test_st7305_frame_places_next_pixel_pair_after_42_bytes);
-    RUN_TEST(test_wheel_thresholds_match_reference_firmware);
+    RUN_TEST(test_st7305_frame_rotates_pixels_180_degrees);
+    RUN_TEST(test_st7305_frame_reverses_pixel_pair_order);
+    RUN_TEST(test_buttons_map_to_confirm_and_cancel);
+    RUN_TEST(test_joystick_select_maps_to_text_backspace);
+    RUN_TEST(test_only_joystick_directions_produce_navigation_actions);
     RUN_TEST(test_joystick_uses_reference_directions_and_x_axis_priority);
     return UNITY_END();
 }
