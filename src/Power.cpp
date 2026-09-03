@@ -33,6 +33,9 @@
 #include <esp_adc/adc_cali_scheme.h>
 #include <esp_adc/adc_oneshot.h>
 #include <esp_err.h>
+#ifdef MOS_TELE
+#include "platform/extra_variants/mos_tele/MosTeleAdc.h"
+#endif
 #endif
 
 #if defined(ARCH_PORTDUINO)
@@ -99,11 +102,12 @@
 
 #if defined(BATTERY_PIN) && defined(ARCH_ESP32)
 
-#ifndef BAT_MEASURE_ADC_UNIT // ADC1 is default
 static const adc_channel_t adc_channel = ADC_CHANNEL;
+
+#ifndef MOS_TELE
+#ifndef BAT_MEASURE_ADC_UNIT // ADC1 is default
 static const adc_unit_t unit = ADC_UNIT_1;
 #else  // ADC2
-static const adc_channel_t adc_channel = ADC_CHANNEL;
 static const adc_unit_t unit = ADC_UNIT_2;
 #endif // BAT_MEASURE_ADC_UNIT
 
@@ -179,6 +183,7 @@ static bool initAdcCalibration()
     LOG_INFO("ADC calibration unsupported; use approx scaling");
     return false;
 }
+#endif // !MOS_TELE
 
 #endif // BATTERY_PIN && ARCH_ESP32
 
@@ -443,7 +448,9 @@ class AnalogBatteryLevel : public HasBatteryLevel
         if (!initial_read_done || !Throttle::isWithinTimespanMs(last_read_time_ms, min_read_interval)) {
             last_read_time_ms = millis();
 
+#if !(defined(ARCH_ESP32) && defined(MOS_TELE))
             uint32_t raw = 0;
+#endif
             float scaled = 0;
 
             battery_adcEnable();
@@ -454,6 +461,15 @@ class AnalogBatteryLevel : public HasBatteryLevel
             scaled = __LL_ADC_CALC_DATA_TO_VOLTAGE(Vref, raw, LL_ADC_RESOLUTION);
             scaled *= operativeAdcMultiplier;
 #elif defined(ARCH_ESP32) // ADC block for espressif platforms
+#ifdef MOS_TELE
+            int voltage_mv = 0;
+            uint16_t measured_mv = 0;
+            if (mosTeleAdcReadMilliVolts(adc_channel, measured_mv))
+                voltage_mv = measured_mv;
+            else
+                LOG_WARN("MOS-TELE battery ADC read failed");
+            scaled = voltage_mv * operativeAdcMultiplier;
+#else
             raw = espAdcRead();
             int voltage_mv = 0;
             if (adc_calibrated && adc_cali_handle) {
@@ -469,7 +485,8 @@ class AnalogBatteryLevel : public HasBatteryLevel
                 voltage_mv = (int)((raw / max_code) * DEFAULT_VREF);
             }
             scaled = voltage_mv * operativeAdcMultiplier;
-#else                     // block for all other platforms
+#endif
+#else // block for all other platforms
 #ifdef ARCH_NRF52
             concurrency::LockGuard saadcGuard(concurrency::nrf52SaadcLock);
 #endif
@@ -501,6 +518,7 @@ class AnalogBatteryLevel : public HasBatteryLevel
     }
 
 #if defined(ARCH_ESP32) && !defined(HAS_PMU) && defined(BATTERY_PIN)
+#ifndef MOS_TELE
     /**
      * ESP32 specific function for getting calibrated ADC reads
      */
@@ -528,6 +546,7 @@ class AnalogBatteryLevel : public HasBatteryLevel
 
         return (raw / (raw_c < 1 ? 1 : raw_c));
     }
+#endif
 #endif
 
     /**
@@ -874,6 +893,12 @@ bool Power::analogInit()
 #ifdef ARCH_STM32
     analogReadResolution(BATTERY_SENSE_RESOLUTION_BITS);
 #elif defined(ARCH_ESP32) // ESP32 needs special analog stuff
+#ifdef MOS_TELE
+    if (!mosTeleAdcInit()) {
+        LOG_ERROR("MOS-TELE ADC1 init failed");
+        return false;
+    }
+#else
     adc_oneshot_unit_init_cfg_t init_config = {
         .unit_id = unit,
     };
@@ -898,7 +923,8 @@ bool Power::analogInit()
     }
 
     adc_calibrated = initAdcCalibration();
-#endif                    // ARCH_ESP32
+#endif
+#endif // ARCH_ESP32
 
     // NRF52 ADC init moved to powerHAL_init in nrf52 platform
 

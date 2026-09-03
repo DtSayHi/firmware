@@ -66,6 +66,12 @@ void test_joystick_uses_reference_directions_and_x_axis_priority()
     TEST_ASSERT_EQUAL(MosTeleKey::NONE, MosTeleInput::classifyJoystick(1600, 1600));
 }
 
+void test_failed_joystick_adc_read_does_not_generate_direction()
+{
+    TEST_ASSERT_EQUAL(MosTeleKey::NONE, MosTeleInput::classifyJoystickSample(false, 0, true, 1600));
+    TEST_ASSERT_EQUAL(MosTeleKey::NONE, MosTeleInput::classifyJoystickSample(true, 1600, false, 0));
+}
+
 int main(int argc, char **argv)
 {
     UNITY_BEGIN();
@@ -75,5 +81,6 @@ int main(int argc, char **argv)
     RUN_TEST(test_joystick_select_maps_to_text_backspace);
     RUN_TEST(test_only_joystick_directions_produce_navigation_actions);
     RUN_TEST(test_joystick_uses_reference_directions_and_x_axis_priority);
+    RUN_TEST(test_failed_joystick_adc_read_does_not_generate_direction);
     return UNITY_END();
 }

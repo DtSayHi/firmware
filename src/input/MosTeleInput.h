@@ -31,5 +31,6 @@ namespace MosTeleInput
 {
 MosTeleKey classifyWheel(uint16_t millivolts);
 MosTeleKey classifyJoystick(uint16_t xMillivolts, uint16_t yMillivolts);
+MosTeleKey classifyJoystickSample(bool xValid, uint16_t xMillivolts, bool yValid, uint16_t yMillivolts);
 MosTeleAction actionForKey(MosTeleKey key);
 } // namespace MosTeleInput

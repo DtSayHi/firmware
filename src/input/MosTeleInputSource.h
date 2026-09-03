@@ -25,6 +25,7 @@ class MosTeleInputSource : public Observable<const InputEvent *>, public concurr
     MosTeleKey stable = MosTeleKey::NONE;
     uint32_t candidateSinceMs = 0;
     uint32_t lastRepeatMs = 0;
+    bool adcReady = false;
 };
 
 extern MosTeleInputSource *mosTeleInputSource;

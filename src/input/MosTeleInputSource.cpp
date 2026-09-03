@@ -4,6 +4,7 @@
 
 #include "Throttle.h"
 #include "UptimeClock.h"
+#include "platform/extra_variants/mos_tele/MosTeleAdc.h"
 #include <Arduino.h>
 
 namespace
@@ -19,8 +20,9 @@ MosTeleInputSource::MosTeleInputSource() : concurrency::OSThread(sourceName)
     pinMode(MOS_TELE_JOYSTICK_SELECT_PIN, INPUT_PULLUP);
     pinMode(MOS_TELE_BUTTON_47_PIN, INPUT_PULLUP);
     pinMode(MOS_TELE_BUTTON_48_PIN, INPUT_PULLUP);
-    analogSetPinAttenuation(MOS_TELE_JOYSTICK_X_PIN, ADC_11db);
-    analogSetPinAttenuation(MOS_TELE_JOYSTICK_Y_PIN, ADC_11db);
+
+    adcReady = mosTeleAdcInit();
+
     inputBroker->registerSource(this);
 }
 
@@ -33,8 +35,11 @@ MosTeleKey MosTeleInputSource::readKey()
     if (digitalRead(MOS_TELE_BUTTON_48_PIN) == LOW)
         return MosTeleKey::BUTTON_48;
 
-    return MosTeleInput::classifyJoystick(analogReadMilliVolts(MOS_TELE_JOYSTICK_X_PIN),
-                                          analogReadMilliVolts(MOS_TELE_JOYSTICK_Y_PIN));
+    uint16_t xMillivolts = 0;
+    uint16_t yMillivolts = 0;
+    const bool xValid = adcReady && mosTeleAdcReadMilliVolts(MOS_TELE_JOYSTICK_X_CHANNEL, xMillivolts);
+    const bool yValid = adcReady && mosTeleAdcReadMilliVolts(MOS_TELE_JOYSTICK_Y_CHANNEL, yMillivolts);
+    return MosTeleInput::classifyJoystickSample(xValid, xMillivolts, yValid, yMillivolts);
 }
 
 bool MosTeleInputSource::isRepeatable(MosTeleKey key) const

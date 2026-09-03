@@ -26,6 +26,13 @@ MosTeleKey classifyJoystick(uint16_t xMillivolts, uint16_t yMillivolts)
     return MosTeleKey::NONE;
 }
 
+MosTeleKey classifyJoystickSample(bool xValid, uint16_t xMillivolts, bool yValid, uint16_t yMillivolts)
+{
+    if (!xValid || !yValid)
+        return MosTeleKey::NONE;
+    return classifyJoystick(xMillivolts, yMillivolts);
+}
+
 MosTeleAction actionForKey(MosTeleKey key)
 {
     switch (key) {
