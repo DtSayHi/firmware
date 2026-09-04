@@ -56,8 +56,7 @@
 #define LED_PIN 42
 #define LED_STATE_ON HIGH
 
-// Reserved peripheral wiring. Drivers are intentionally not enabled in the
-// first platform revision until they have separate hardware validation.
+// ES8311 codec and speaker amplifier.
 #define MOS_TELE_AUDIO_POWER 10
 #define MOS_TELE_AUDIO_ENABLE 21
 #define MOS_TELE_I2S_DIN 12
@@ -65,6 +64,15 @@
 #define MOS_TELE_I2S_BCLK 14
 #define MOS_TELE_I2S_MCLK 38
 #define MOS_TELE_I2S_DOUT 45
+#define HAS_I2S
+#define DAC_I2S_BCK MOS_TELE_I2S_BCLK
+#define DAC_I2S_WS MOS_TELE_I2S_WS
+#define DAC_I2S_DOUT MOS_TELE_I2S_DOUT
+#define DAC_I2S_DIN MOS_TELE_I2S_DIN
+#define DAC_I2S_MCLK MOS_TELE_I2S_MCLK
+#define AUDIO_AMP_ENABLE(on) digitalWrite(MOS_TELE_AUDIO_ENABLE, (on) ? HIGH : LOW)
+
+// Reserved peripheral wiring.
 #define MOS_TELE_SD_D0 39
 #define MOS_TELE_SD_CLK 40
 #define MOS_TELE_SD_CMD 41
