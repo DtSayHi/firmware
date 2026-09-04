@@ -55,6 +55,7 @@
 
 #define LED_PIN 42
 #define LED_STATE_ON HIGH
+#define LED_NOTIFICATION LED_PIN
 
 // ES8311 codec and speaker amplifier.
 #define MOS_TELE_AUDIO_POWER 10
